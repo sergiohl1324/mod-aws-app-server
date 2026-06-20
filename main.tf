@@ -62,6 +62,10 @@ resource "aws_instance" "this" {
     message      = var.html_message
     enable_uwsgi = var.enable_uwsgi
   })
+  # AWS provider default is a stop/start in place, which does NOT re-run
+  # cloud-init's user_data on an existing instance — force a real replacement
+  # instead, so user_data changes (and the enable_uwsgi toggle) actually take effect.
+  user_data_replace_on_change = true
 
   # IMDSv2 required (SSRF/credential theft protection)
   metadata_options {

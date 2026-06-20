@@ -1,27 +1,27 @@
 ### SECURITY GROUP — APP SERVER ###
 
-resource "aws_security_group" "app_server" {
+module "sg_app_server" {
+  source = "git::https://github.com/sergiohl1324/mod-aws-security-group.git?ref=main"
+
   name        = "${var.project}-sg-app-server"
   description = "Permite trafico HTTP solo desde el Security Group del ALB"
   vpc_id      = var.vpc_id
 
-  ingress {
-    description     = "HTTP desde el ALB"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
-  }
+  ingress_with_source_security_group_id = [
+    {
+      from_port                = 80
+      to_port                  = 80
+      protocol                 = "tcp"
+      description              = "HTTP desde el ALB"
+      source_security_group_id = var.alb_security_group_id
+    }
+  ]
 
-  egress {
-    description = "Salida a internet (apt/pip, agente SSM)"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  egress_rules = ["all-all"]
 
-  tags = merge(local.common_tags, { Name = "${var.project}-sg-app-server" })
+  project     = var.project
+  environment = var.environment
+  tags        = var.tags
 }
 
 ### IAM ROLE — ACCESO SSM (sin SSH) ###
@@ -54,7 +54,7 @@ resource "aws_instance" "this" {
   instance_type               = var.instance_type
   subnet_id                   = var.subnet_id
   associate_public_ip_address = true
-  vpc_security_group_ids      = [aws_security_group.app_server.id]
+  vpc_security_group_ids      = [module.sg_app_server.this_security_group_id]
   iam_instance_profile        = module.iam_role.instance_profile_name
 
   user_data = templatefile("${path.module}/templates/user_data.sh.tpl", {

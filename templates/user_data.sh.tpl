@@ -24,7 +24,7 @@ cat > /var/www/poc/index.html <<'HTML'
 HTML
 
 %{ if enable_uwsgi }
-echo "=== Modo uWSGI: compilando e instalando uWSGI ==="
+echo "=== uWSGI mode: compiling and installing uWSGI ==="
 apt-get install -y build-essential python3-dev python3-venv
 
 mkdir -p /opt/poc-app
@@ -82,7 +82,7 @@ NGINXCFG
 systemctl daemon-reload
 systemctl enable --now uwsgi
 %{ else }
-echo "=== Modo estatico: nginx sirve el HTML directamente ==="
+echo "=== Static mode: nginx serves the HTML directly ==="
 cat > /etc/nginx/sites-available/default <<'NGINXCFG'
 server {
     listen 80 default_server;
@@ -99,4 +99,4 @@ NGINXCFG
 systemctl restart nginx
 systemctl enable nginx
 
-echo "=== Bootstrap completo ==="
+echo "=== Bootstrap complete ==="

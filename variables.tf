@@ -1,74 +1,74 @@
-### VARIABLES GLOBALES ###
+### GLOBAL VARIABLES ###
 
 variable "project" {
-  description = "Nombre del proyecto (naming/tagging)"
+  description = "Project name (naming/tagging)"
   type        = string
   default     = "poc"
 }
 
 variable "environment" {
-  description = "Ambiente lógico (ej. nonproduction, production) usado para tagging"
+  description = "Logical environment (e.g. nonproduction, production) used for tagging"
   type        = string
   default     = "nonproduction"
 }
 
 variable "tags" {
-  description = "Tags adicionales que se fusionan con los tags por defecto"
+  description = "Additional tags merged with the default tags"
   type        = map(string)
   default     = {}
 }
 
-### VARIABLES EC2 ###
+### EC2 VARIABLES ###
 
 variable "ami" {
-  description = "AMI a usar. Recomendado: Ubuntu 22.04/24.04 LTS — apt-get install build-essential/python3-dev/python3-venv es el combo más estable para compilar uWSGI vía pip."
+  description = "AMI to use. Recommended: Ubuntu 22.04/24.04 LTS — apt-get install build-essential/python3-dev/python3-venv is the most stable combo to compile uWSGI via pip."
   type        = string
 }
 
 variable "instance_type" {
-  description = "Tipo de instancia EC2"
+  description = "EC2 instance type"
   type        = string
   default     = "t3.micro"
 }
 
 variable "vpc_id" {
-  description = "ID de la VPC donde se crea el Security Group de la instancia"
+  description = "ID of the VPC where the instance's Security Group is created"
   type        = string
 }
 
 variable "subnet_id" {
-  description = "Subnet (pública) donde se lanza la instancia"
+  description = "Subnet (public) where the instance is launched"
   type        = string
 }
 
 variable "alb_security_group_id" {
-  description = "Security Group del ALB — se permite ingress :80 únicamente desde este SG"
+  description = "ALB Security Group — ingress on :80 is only allowed from this SG"
   type        = string
 }
 
 variable "target_group_arn" {
-  description = "ARN del Target Group del ALB donde se registra la instancia"
+  description = "ARN of the ALB Target Group the instance is registered to"
   type        = string
 }
 
-### TOGGLE BONUS — uWSGI ###
+### BONUS TOGGLE — uWSGI ###
 
 variable "enable_uwsgi" {
-  description = "Si false, nginx sirve el HTML estático directo. Si true, además se compila/instala uWSGI, se despliega una mini app WSGI, y nginx hace reverse proxy hacia uWSGI vía unix socket."
+  description = "If false, nginx serves the static HTML directly. If true, it also compiles/installs uWSGI, deploys a minimal WSGI app, and nginx reverse-proxies to uWSGI via a unix socket."
   type        = bool
   default     = false
 }
 
-### CONTENIDO HTML DE PRUEBA ###
+### TEST HTML CONTENT ###
 
 variable "html_title" {
-  description = "Título de la página HTML de prueba"
+  description = "Title of the test HTML page"
   type        = string
-  default     = "POC AWS — Sergio Hernández"
+  default     = "POC AWS — Sergio Hernandez"
 }
 
 variable "html_message" {
-  description = "Mensaje de la página HTML de prueba"
+  description = "Message shown on the test HTML page"
   type        = string
-  default     = "Infraestructura desplegada con Terraform: VPC + ALB + EC2"
+  default     = "Infrastructure deployed with Terraform: VPC + ALB + EC2"
 }

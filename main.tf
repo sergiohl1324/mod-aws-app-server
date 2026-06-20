@@ -4,7 +4,7 @@ module "sg_app_server" {
   source = "git::https://github.com/sergiohl1324/mod-aws-security-group.git?ref=main"
 
   name        = "${var.project}-sg-app-server"
-  description = "Permite trafico HTTP solo desde el Security Group del ALB"
+  description = "Allows HTTP traffic only from the ALB's Security Group"
   vpc_id      = var.vpc_id
 
   ingress_with_source_security_group_id = [
@@ -12,7 +12,7 @@ module "sg_app_server" {
       from_port                = 80
       to_port                  = 80
       protocol                 = "tcp"
-      description              = "HTTP desde el ALB"
+      description              = "HTTP from the ALB"
       source_security_group_id = var.alb_security_group_id
     }
   ]
@@ -24,7 +24,7 @@ module "sg_app_server" {
   tags        = var.tags
 }
 
-### IAM ROLE — ACCESO SSM (sin SSH) ###
+### IAM ROLE — SSM ACCESS (no SSH) ###
 
 module "iam_role" {
   source = "git::https://github.com/sergiohl1324/mod-aws-iam-role.git?ref=main"
@@ -63,7 +63,7 @@ resource "aws_instance" "this" {
     enable_uwsgi = var.enable_uwsgi
   })
 
-  # IMDSv2 obligatorio (protección SSRF/credential theft)
+  # IMDSv2 required (SSRF/credential theft protection)
   metadata_options {
     http_endpoint               = "enabled"
     http_tokens                 = "required"
@@ -79,15 +79,15 @@ resource "aws_instance" "this" {
 
   tags = merge(local.common_tags, { Name = "${var.project}-app-server" })
 
-  # Nota: a propósito NO se ignoran cambios en user_data (a diferencia del
-  # patrón típico de módulos EC2) — el toggle enable_uwsgi depende de que
-  # un cambio en user_data fuerce el reemplazo de la instancia.
+  # Note: user_data changes are intentionally NOT ignored (unlike the typical
+  # EC2 module pattern) — the enable_uwsgi toggle relies on a user_data change
+  # forcing the instance to be replaced.
   lifecycle {
     ignore_changes = [ami]
   }
 }
 
-### REGISTRO EN EL TARGET GROUP DEL ALB ###
+### ALB TARGET GROUP REGISTRATION ###
 
 resource "aws_lb_target_group_attachment" "this" {
   target_group_arn = var.target_group_arn

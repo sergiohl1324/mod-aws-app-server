@@ -1,27 +1,27 @@
 # mod-aws-app-server
 
-Módulo Terraform para el "Application Server" de la POC: EC2 + Security Group (vía [mod-aws-security-group](https://github.com/sergiohl1324/mod-aws-security-group), ingress solo desde el SG del ALB) + IAM Role/Instance Profile con SSM (sin SSH, vía [mod-aws-iam-role](https://github.com/sergiohl1324/mod-aws-iam-role)) + registro en un Target Group de ALB.
+Terraform module for the POC's "Application Server": EC2 + Security Group (via [mod-aws-security-group](https://github.com/sergiohl1324/mod-aws-security-group), ingress only from the ALB's SG) + IAM Role/Instance Profile with SSM (no SSH, via [mod-aws-iam-role](https://github.com/sergiohl1324/mod-aws-iam-role)) + registration in an ALB Target Group.
 
-El `user_data` (`templates/user_data.sh.tpl`) instala nginx y sirve un HTML simple. Con el toggle `enable_uwsgi = true`, además compila/instala uWSGI (vía pip, requiere `build-essential`/`python3-dev`), despliega una mini app WSGI, y reconfigura nginx como reverse proxy hacia uWSGI por unix socket.
+The `user_data` (`templates/user_data.sh.tpl`) installs nginx and serves a simple HTML page. With the `enable_uwsgi = true` toggle, it also compiles/installs uWSGI (via pip, requires `build-essential`/`python3-dev`), deploys a minimal WSGI app, and reconfigures nginx as a reverse proxy to uWSGI over a unix socket.
 
-> **Nota:** este módulo depende de `mod-aws-security-group` y `mod-aws-iam-role` como módulos hijos (referenciados por `git::...?ref=main`). Para que `terraform init` funcione desde cualquier máquina, ambos repos deben ser públicos.
+> **Note:** this module depends on `mod-aws-security-group` and `mod-aws-iam-role` as child modules (referenced via `git::...?ref=main`). For `terraform init` to work from any machine, both repos must be public.
 
-## AMI recomendada
+## Recommended AMI
 
-**Ubuntu 22.04/24.04 LTS.** El script usa `apt-get`. Amazon Linux 2023 (dnf) también podría funcionar pero tiene más fricción histórica compilando extensiones C de Python (PEP 668 / headers de `python3-devel`).
+**Ubuntu 22.04/24.04 LTS.** The script uses `apt-get`. Amazon Linux 2023 (dnf) might also work but has more historical friction compiling Python C extensions (PEP 668 / `python3-devel` headers).
 
-## Gotcha importante: `lifecycle.ignore_changes`
+## Important gotcha: `lifecycle.ignore_changes`
 
-A diferencia de la mayoría de módulos EC2 reutilizables (que suelen ignorar cambios en `user_data` para evitar recrear la instancia), **este módulo NO ignora `user_data`** — solo ignora `ami`. Esto es intencional: cambiar `enable_uwsgi` cambia el `user_data` renderizado, y Terraform necesita reemplazar la instancia (`# forces replacement`) para que el cambio tome efecto.
+Unlike most reusable EC2 modules (which usually ignore `user_data` changes to avoid recreating the instance), **this module does NOT ignore `user_data`** — only `ami` is ignored. This is intentional: changing `enable_uwsgi` changes the rendered `user_data`, and Terraform needs to replace the instance (`# forces replacement`) for the change to take effect.
 
-## Uso
+## Usage
 
 ```hcl
 module "app_server" {
   source = "git::https://github.com/sergiohl1324/mod-aws-app-server.git?ref=main"
 
   project                = "poc"
-  ami                    = "ami-xxxxxxxx" # Ubuntu 22.04/24.04 LTS de la región
+  ami                    = "ami-xxxxxxxx" # Ubuntu 22.04/24.04 LTS for the region
   vpc_id                 = module.vpc.vpc_id
   subnet_id              = module.vpc.public_subnets[0]
   alb_security_group_id  = module.sg_alb.this_security_group_id
@@ -32,7 +32,7 @@ module "app_server" {
 
 ## Debug
 
-Sin SSH abierto — usar SSM Session Manager:
+No SSH exposed — use SSM Session Manager:
 
 ```bash
 aws ssm start-session --target <instance_id>

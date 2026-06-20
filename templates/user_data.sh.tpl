@@ -10,7 +10,7 @@ apt-get install -y nginx
 
 mkdir -p /var/www/poc
 
-cat > /var/www/poc/index.html <<'HTML'
+cat > /var/www/poc/index.html <<HTML
 <!DOCTYPE html>
 <html>
 <head><title>${title}</title></head>

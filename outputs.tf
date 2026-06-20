@@ -10,5 +10,5 @@ output "instance_public_ip" {
 
 output "security_group_id" {
   description = "ID del Security Group de la instancia"
-  value       = aws_security_group.app_server.id
+  value       = module.sg_app_server.this_security_group_id
 }

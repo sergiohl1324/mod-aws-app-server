@@ -4,7 +4,7 @@ module "sg_app_server" {
   source = "git::https://github.com/sergiohl1324/mod-aws-security-group.git?ref=main"
 
   name        = "${var.project}-sg-app-server"
-  description = "Allows HTTP traffic only from the ALB's Security Group"
+  description = "Allows HTTP traffic only from the ALB Security Group"
   vpc_id      = var.vpc_id
 
   ingress_with_source_security_group_id = [

@@ -1,8 +1,10 @@
 # mod-aws-app-server
 
-Módulo Terraform para el "Application Server" de la POC: EC2 + Security Group (ingress solo desde el SG del ALB) + IAM Role/Instance Profile con SSM (sin SSH) + registro en un Target Group de ALB.
+Módulo Terraform para el "Application Server" de la POC: EC2 + Security Group (vía [mod-aws-security-group](https://github.com/sergiohl1324/mod-aws-security-group), ingress solo desde el SG del ALB) + IAM Role/Instance Profile con SSM (sin SSH, vía [mod-aws-iam-role](https://github.com/sergiohl1324/mod-aws-iam-role)) + registro en un Target Group de ALB.
 
 El `user_data` (`templates/user_data.sh.tpl`) instala nginx y sirve un HTML simple. Con el toggle `enable_uwsgi = true`, además compila/instala uWSGI (vía pip, requiere `build-essential`/`python3-dev`), despliega una mini app WSGI, y reconfigura nginx como reverse proxy hacia uWSGI por unix socket.
+
+> **Nota:** este módulo depende de `mod-aws-security-group` y `mod-aws-iam-role` como módulos hijos (referenciados por `git::...?ref=main`). Para que `terraform init` funcione desde cualquier máquina, ambos repos deben ser públicos.
 
 ## AMI recomendada
 
@@ -22,7 +24,7 @@ module "app_server" {
   ami                    = "ami-xxxxxxxx" # Ubuntu 22.04/24.04 LTS de la región
   vpc_id                 = module.vpc.vpc_id
   subnet_id              = module.vpc.public_subnets[0]
-  alb_security_group_id  = module.sg_alb.security_group_id
+  alb_security_group_id  = module.sg_alb.this_security_group_id
   target_group_arn       = module.alb.target_group_arns["web"]
   enable_uwsgi           = false
 }

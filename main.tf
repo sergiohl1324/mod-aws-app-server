@@ -72,9 +72,9 @@ resource "aws_instance" "this" {
 
   root_block_device {
     volume_size           = 10
-    volume_type            = "gp3"
-    encrypted              = true
-    delete_on_termination  = true
+    volume_type           = "gp3"
+    encrypted             = true
+    delete_on_termination = true
   }
 
   tags = merge(local.common_tags, { Name = "${var.project}-app-server" })
@@ -91,6 +91,6 @@ resource "aws_instance" "this" {
 
 resource "aws_lb_target_group_attachment" "this" {
   target_group_arn = var.target_group_arn
-  target_id         = aws_instance.this.id
-  port              = 80
+  target_id        = aws_instance.this.id
+  port             = 80
 }

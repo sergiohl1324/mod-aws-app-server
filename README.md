@@ -10,9 +10,11 @@ The `user_data` (`templates/user_data.sh.tpl`) installs nginx and serves a simpl
 
 **Ubuntu 22.04/24.04 LTS.** The script uses `apt-get`. Amazon Linux 2023 (dnf) might also work but has more historical friction compiling Python C extensions (PEP 668 / `python3-devel` headers).
 
-## Important gotcha: `lifecycle.ignore_changes`
+## Important gotcha: `lifecycle.ignore_changes` and `user_data_replace_on_change`
 
-Unlike most reusable EC2 modules (which usually ignore `user_data` changes to avoid recreating the instance), **this module does NOT ignore `user_data`** — only `ami` is ignored. This is intentional: changing `enable_uwsgi` changes the rendered `user_data`, and Terraform needs to replace the instance (`# forces replacement`) for the change to take effect.
+Unlike most reusable EC2 modules (which usually ignore `user_data` changes to avoid recreating the instance), **this module does NOT ignore `user_data`** — only `ami` is ignored. This is intentional: changing `enable_uwsgi` changes the rendered `user_data`, and Terraform needs to replace the instance for the change to take effect.
+
+By default, the AWS provider only stops/starts the instance in place when `user_data` changes, which does **not** re-run cloud-init's `user_data` on an already-booted instance. This module sets `user_data_replace_on_change = true` to force a real replacement instead, so toggling `enable_uwsgi` actually re-runs the bootstrap script.
 
 ## Usage
 

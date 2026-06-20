@@ -13,7 +13,10 @@ mkdir -p /var/www/poc
 cat > /var/www/poc/index.html <<HTML
 <!DOCTYPE html>
 <html>
-<head><title>${title}</title></head>
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+</head>
 <body>
   <h1>${title}</h1>
   <p>${message}</p>
